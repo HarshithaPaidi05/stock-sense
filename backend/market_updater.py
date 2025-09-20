@@ -4,6 +4,7 @@ from typing import List, Dict
 import os
 from market import load_market as load_market_original
 
+
 # ------------------------------
 # Configure logging
 logger = logging.getLogger(__name__)
