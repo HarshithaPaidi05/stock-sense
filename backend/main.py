@@ -12,23 +12,36 @@ import market_updater
 import pathway_mock
 import flexprice_mock
 import logging
+from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize background tasks on startup."""
-    logger.info("Starting market updater background task...")
+# --- Lifespan handler replaces @app.on_event ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown logic for the FastAPI app."""
+    # Startup
+    logger.info("🚀 Starting market updater background task...")
     market_updater.start_market_updater()
+
+    yield  # App runs here
+
+    # Shutdown
+    logger.info("🛑 Shutting down application... cleanup if needed")
+
+
+# Create FastAPI app with lifespan
+app = FastAPI(lifespan=lifespan)
 
 # Add CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://your-vercel-app.vercel.app"  # ✅ add your actual Vercel domain here
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
