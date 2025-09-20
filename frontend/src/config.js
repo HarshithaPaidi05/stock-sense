@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE = 'http://localhost:8000'
+export const API_BASE = 'https://stock-sense-production.up.railway.app'
 
 // API Endpoints
 export const API_ENDPOINTS = {
