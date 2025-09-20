@@ -1,5 +1,5 @@
 # Run instructions:
-# python -m venv .venv ; source .venv/bin/activate ; pip install -r requirements.txt ; uvicorn main:app --reload --port 8000
+# python -m venv .venv ; source .venv/bin/activate ; pip install -r requirements.txt ; uvicorn main:app --port 8000
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,11 +14,13 @@ import flexprice_mock
 import logging
 from contextlib import asynccontextmanager
 
+# ------------------------------
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- Lifespan handler replaces @app.on_event ---
+# ------------------------------
+# Lifespan handler replaces @app.on_event
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown logic for the FastAPI app."""
@@ -31,36 +33,39 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("🛑 Shutting down application... cleanup if needed")
 
-
+# ------------------------------
 # Create FastAPI app with lifespan
 app = FastAPI(lifespan=lifespan)
 
+# ------------------------------
 # Add CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "https://your-vercel-app.vercel.app"  # ✅ add your actual Vercel domain here
+        "http://localhost:5173",  # local dev
+        "https://stock-sense-hwh.netlify.app"  # Netlify frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ------------------------------
 # Billing constants
 PRICE_PER_ADVICE = 2
 PRICE_PER_PORTFOLIO = 5
 
-
+# ------------------------------
+# Request models
 class PortfolioRequest(BaseModel):
     portfolio: List[Dict]
 
-
+# ------------------------------
+# API Endpoints
 @app.get("/api/market")
 async def get_market():
     """Get market data from in-memory cache."""
     return await market_updater.get_market_data()
-
 
 @app.post("/api/analyze")
 async def analyze_portfolio(request: PortfolioRequest):
@@ -78,7 +83,7 @@ async def analyze_portfolio(request: PortfolioRequest):
     # Process billing through Flexprice Mock
     flexprice_billing = flexprice_mock.flexprice_client.process_full_analysis_billing(advice_count)
     
-    # Create simplified billing response (maintaining compatibility)
+    # Create simplified billing response
     total_charged = PRICE_PER_PORTFOLIO + (advice_count * PRICE_PER_ADVICE)
     billing = {
         'charged': total_charged,
@@ -104,12 +109,10 @@ async def analyze_portfolio(request: PortfolioRequest):
         'usage': usage_summary
     }
 
-
 @app.get("/api/usage")
 async def get_usage():
     """Get usage summary."""
     return usage_store.get_usage_summary()
-
 
 @app.get("/health")
 async def health_check():
@@ -120,7 +123,6 @@ async def health_check():
         "version": "1.0.0",
         "timestamp": usage_store.get_usage_summary()
     }
-
 
 @app.get("/api/integrations/status")
 async def get_integrations_status():
