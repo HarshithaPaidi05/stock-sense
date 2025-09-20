@@ -1,0 +1,6 @@
+symbol,name,sector,price,change_1d_pct,change_7d_pct,volatility,market_cap_cr
+TCS,Tata Consultancy Services,IT,3300,0.4,1.8,0.015,125000
+INFY,Infosys,IT,1700,-0.6,2.4,0.020,76000
+RELIANCE,Reliance Industries,Energy,2600,1.2,6.0,0.035,160000
+SUNPHARMA,Sun Pharmaceutical,Pharma,900,-2.5,-5.0,0.050,18000
+HDFCBANK,HDFC Bank,Banking,1500,0.2,0.9,0.012,90000
