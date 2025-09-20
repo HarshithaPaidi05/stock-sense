@@ -1,15 +1,31 @@
 import asyncio
 import logging
 from typing import List, Dict
-from market import load_market
+import os
+from market import load_market as load_market_original
+
+# ------------------------------
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Global variable to store the latest market data
 _market_data: List[Dict] = []
 _market_data_lock = asyncio.Lock()
 
-logger = logging.getLogger(__name__)
+# ------------------------------
+# Determine the path to stocks.csv dynamically
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this file
+DATA_FILE = os.path.join(BASE_DIR, "data", "stocks.csv")  # assumes backend/data/stocks.csv
 
+# ------------------------------
+# Wrapper to load market using absolute path
+def load_market() -> List[Dict]:
+    if not os.path.exists(DATA_FILE):
+        raise FileNotFoundError(f"Market data CSV not found at {DATA_FILE}")
+    return load_market_original(DATA_FILE)  # pass the absolute path to your original load_market function
 
+# ------------------------------
+# Async functions
 async def get_market_data() -> List[Dict]:
     """Get the current in-memory market data."""
     async with _market_data_lock:
@@ -42,7 +58,6 @@ async def market_updater_task() -> None:
             await refresh_market_data()
         except Exception as e:
             logger.error(f"Error in market updater task: {e}")
-            # Continue running even if there's an error
             await asyncio.sleep(30)
 
 
