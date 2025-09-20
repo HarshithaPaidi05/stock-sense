@@ -14,18 +14,15 @@ _market_data_lock = asyncio.Lock()
 
 # ------------------------------
 # Determine the path to stocks.csv dynamically
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # backend folder
-DATA_FILE = os.path.join(BASE_DIR, "..", "data", "stocks.csv")  # points to parent folder
-
-# Normalize path (optional, avoids ../ issues)
-DATA_FILE = os.path.abspath(DATA_FILE)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this file
+DATA_FILE = os.path.join(BASE_DIR, "data", "stocks.csv")  # assumes backend/data/stocks.csv
 
 # ------------------------------
 # Wrapper to load market using absolute path
 def load_market() -> List[Dict]:
     if not os.path.exists(DATA_FILE):
         raise FileNotFoundError(f"Market data CSV not found at {DATA_FILE}")
-    return load_market_original(DATA_FILE)  # pass absolute path to original load_market function
+    return load_market_original(DATA_FILE)  # pass the absolute path to your original load_market function
 
 # ------------------------------
 # Async functions
